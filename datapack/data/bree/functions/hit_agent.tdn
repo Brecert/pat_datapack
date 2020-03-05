@@ -1,0 +1,17 @@
+@require bree:components
+
+define event hit
+
+define entity hit_agent minecraft:bee implements invisible {
+    default nbt {
+        NoGravity:1b,
+        Silent:1b,
+        NoAI:1b
+    }
+    
+    default health 6400000
+
+    ticking function tick {
+        event @s[nbt={HurtTime:10s}] hit
+    }
+}

@@ -1,0 +1,13 @@
+@meta_tag trident:advancement
+@metadata {
+    "advancement_triggers": [
+        {
+            "trigger": "minecraft:tick"
+        }
+    ]
+}
+
+define objective id
+
+set #LAST_ID->id += 1
+set @s->id = #LAST_ID->id

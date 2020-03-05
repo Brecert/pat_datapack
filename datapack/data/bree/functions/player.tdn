@@ -1,0 +1,56 @@
+@tag tick
+@require bree:first_join
+@require bree:hit_agent
+
+define event sneak
+define event stand
+define objective sneakTime minecraft.custom:minecraft.sneak_time
+define objective global
+
+define entity patbox $hit_agent {
+    on hit function {
+        positioned ^ ^-0.3 ^ particle minecraft:heart ~ ~0.6 ~ 0 0 0 1 1 force @a
+    }
+}
+
+define function kill_patbox {
+    at @s as @e[type=$patbox] if score @s id = #s id function remove_patbox {
+        tp ~ -10 ~
+        kill @s
+    }
+}
+
+define entity default minecraft:player {
+    on stand function on_walk {
+        set #s->id = @s->id
+        tag @s remove sneak
+        function bree:player/kill_patbox
+    }
+    
+    on sneak function on_sneak {
+        set #s->id = @s->id
+        tag @s add sneak
+        
+        set #success->global = 0
+        at @s positioned ^ ^0.5 ^ as @e[type=$patbox] if score @s id = #s id function move_patbox {
+            tp ~ ~1 ~
+            set #success->global = 1
+        }
+        
+#        var debug = new text_component([{ score: { name: "#success", objective: "global" } }])
+#        tellraw @a $debug
+                
+        at @s if entity @a[distance=0.01..6,tag=sneak] if score #success global matches 0 function create_patbox {
+            using summon $patbox ~ ~1.4 ~ with new {
+                set @s->id = #s->id
+            }
+        }
+        
+        at @s unless entity @a[distance=0.01..6,tag=sneak] function bree:player/kill_patbox
+    }
+}
+
+event @a[scores={sneakTime=1..}] sneak
+event @a[scores={sneakTime=0}] stand
+
+set @a->sneakTime = 0
